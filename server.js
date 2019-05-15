@@ -32,9 +32,6 @@ io.on('connection', (socket) => {
     // Every socket connection has a unique ID
     console.log('new connection: ' + socket.id);
 
-    
-
-
     // User Logged in
     socket.on('login', (name) => {
         // Map socket.id to the name
@@ -43,8 +40,8 @@ io.on('connection', (socket) => {
 
         onlineUser.name = name;
         onlineUser.count = onlineUser.count + 1;
-
-        socket.emit('userCount', {
+        socket.join('userBox');
+        io.to('userBox').emit('userCount', {
             userCount: onlineUser.count
         });
     
@@ -61,7 +58,7 @@ io.on('connection', (socket) => {
     // Message Recieved
     socket.on('msg', (message) => {
         // Broadcast to everyone else (except the sender)
-        socket.broadcast.emit('msg', {
+        socket.emit('msg', {
             from: users.name,
             message: message
         });
@@ -74,9 +71,10 @@ io.on('connection', (socket) => {
     });
 
     // Disconnected
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function (a,callback) {
         onlineUser.count = onlineUser.count - 1;
-        socket.emit('userCount', {
+        socket.join('userBox');
+        io.to('userBox').emit('userCount', {
             userCount: onlineUser.count
         });
         console.log('userCount :', onlineUser.count);
