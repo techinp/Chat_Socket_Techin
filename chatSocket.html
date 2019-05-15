@@ -16,41 +16,48 @@
     <div class="container">
         <div class="row">
             <div class="col-9">
-                    <div class="row">
-                            <div class="col-6">
-                                <form id="loginForm">
-                                    <div class="input-group mb-3">
-                                        <input type="text" class="form-control" autocomplete="off" placeholder="name..." id="nameInput">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-success" type="submit">Login</button>
-                                        </div>
-                                    </div>
-                                </form>
+                <div class="row">
+                    <div class="col-6">
+                        <form id="loginForm">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" autocomplete="off" placeholder="name..."
+                                    id="nameInput">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="submit">Login</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <form action="" id="messageForm">
-                                    <div class="input-group mb-3">
-                                        <!-- <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" > -->
-                                        <input type="text" class="form-control" autocomplete="off" placeholder="chat..."
-                                            id="messageInput">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-primary" type="submit">Send</button>
-                                        </div>
-                                    </div>
-                                </form>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <form action="" id="messageForm">
+                            <div class="input-group mb-3">
+                                <!-- <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" > -->
+                                <input type="text" class="form-control" autocomplete="off" placeholder="chat..."
+                                    id="messageInput">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-primary" type="submit">Send</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div style="overflow-y: scroll; height:400px;" class="col" id="messagesContainer">
-                                <!-- Chat Messages Here -->
-                            </div>
-                        </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+                    <div style="overflow-y: scroll; height:400px;" class="col" id="messagesContainer">
+                        <!-- Chat Messages Here -->
+                    </div>
+                </div>
             </div>
-            <div class="col-3">22</div>
+            <div class="col-3">
+                <div class="row">
+                    <div style="overflow-y: scroll; height:400px;" class="col" id="userOnlineContainer">
+                        <!-- Chat Messages Here -->
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
     </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -73,6 +80,7 @@
             const $messageInput = document.getElementById('messageInput');
             const $messageForm = document.getElementById('messageForm')
             const $messagesContainer = document.getElementById('messagesContainer')
+            const $userOnlineContainer = document.getElementById('userOnlineContainer')
 
             // socket is the global object used to listen on incoming messages
             let socket = io()
@@ -93,10 +101,16 @@
                     }
                 })
 
+                // user disconnect
                 socket.on('disconnect', (data) => {
                     console.log('disconnect :', data);
                     say('server', data.message)
                 })
+
+                // count of user
+                socket.on('userCount', function (data) {
+                    console.log(data.userCount);
+                });
 
                 return socket;
             }
@@ -106,6 +120,7 @@
                 socket = ioConnect()
                 username = name;
                 socket.emit('login', name)
+                // userOnline(name)
             }
 
             // Login
@@ -136,6 +151,11 @@
         </div>`
                 // Scroll down to last message
                 $messagesContainer.scrollTop = $messagesContainer.scrollHeight
+            }
+
+            function userOnline(name) {
+                $userOnlineContainer.innerHTML += `<div class="chat-message">
+            <span style="color: red; font-weight: bold;">${name}:</span></div>`
             }
         })
     </script>

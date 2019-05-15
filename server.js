@@ -20,20 +20,35 @@ app.get('/chatSocket', (req, res) => {
 });
 
 // let users = {};
+// var userCount = 0;
+var onlineUser = {};
+onlineUser.count = 0;
 
 // Socket.io
 io.on('connection', (socket) => {
 
+    let users = {};
+
     // Every socket connection has a unique ID
     console.log('new connection: ' + socket.id);
 
-    let users = {};
+    
+
 
     // User Logged in
     socket.on('login', (name) => {
         // Map socket.id to the name
         users.id = socket.id;
         users.name = name;
+
+        onlineUser.name = name;
+        onlineUser.count = onlineUser.count + 1;
+
+        socket.emit('userCount', {
+            userCount: onlineUser.count
+        });
+    
+        console.log('userCount :', onlineUser.count);    
 
         // Broadcast to everyone else (except the sender).
         // Say that the user has logged in.
@@ -59,7 +74,12 @@ io.on('connection', (socket) => {
     });
 
     // Disconnected
-    socket.on('disconnect', function(){
+    socket.on('disconnect', function () {
+        onlineUser.count = onlineUser.count - 1;
+        socket.emit('userCount', {
+            userCount: onlineUser.count
+        });
+        console.log('userCount :', onlineUser.count);
         // Remove the socket.id -> name mapping of this user
         io.emit('disconnect', {
             from: users.name,
