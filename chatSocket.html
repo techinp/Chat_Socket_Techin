@@ -52,7 +52,8 @@
             <div class="col-3">
                 <div class="row">
                     <div class="col-12">
-                        <div class="text-center mt-1">User online : <span id="userCount" class="text-center"> 0</span></div>
+                        <div class="text-center mt-1">User online : <span id="userCount" class="text-center"> 0</span>
+                        </div>
                     </div>
                     <div style="overflow-y: scroll; height:400px;" class="col" id="userOnlineContainer">
                         <!-- Chat Messages Here -->
@@ -92,34 +93,58 @@
             // username is used to be compared with 'from' in 'msg' events
             let username;
 
+            socket.on('userOnline', (data) => {
+                console.log('dataonline :', data.list);
+                $userCount.innerHTML = data.list
+            })
+
             function ioConnect() {
                 window.onunload = () => socket.close()
 
-                // Recieve Message
+                // Login
+                socket.on('login', (data) => {
+                    say(data.from, data.message)
+                });
+
+                // Show message
                 socket.on('msg', (data) => {
-                    console.log('data :', data);
                     if (data.from != username) {
                         say(data.from, data.message)
                     } else {
                         say('me', data.message)
                     }
-                })
-
-                // user disconnect
-                socket.on('disconnect', (data) => {
-                    console.log('disconnect :', data);
-                    say('server', data.message)
-                })
-
-                // count of user
-                socket.on('userCount', function (data) {
-                    console.log(data.userCount);
-                    $userCount.innerHTML = data.userCount
                 });
+
+                console.log('test online');
+
+
+
+                // Recieve Message
+                // socket.on('msg', (data) => {
+                //     console.log('data :', data);
+                //     if (data.from != username) {
+                //         say(data.from, data.message)
+                //     } else {
+                //         say('me', data.message)
+                //     }
+                // })
+
+                // // user disconnect
+                // socket.on('disconnect', (data) => {
+                //     console.log('disconnect :', data);
+                //     say('server', data.message)
+                // })
+
+                // // count of user
+                // socket.on('userCount', function (data) {
+                //     console.log(data.userCount);
+                //     $userCount.innerHTML = data.userCount
+                // });
 
                 return socket;
             }
 
+            // Send name login to server
             function login(name) {
                 // Create a socket connection
                 socket = ioConnect()
@@ -128,7 +153,7 @@
                 // userOnline(name)
             }
 
-            // Login
+            // Listener value from login form
             $loginForm.addEventListener('submit', function (event) {
                 event.preventDefault()
                 // Login with `name`
@@ -160,7 +185,7 @@
 
             function userOnline(name) {
                 $userOnlineContainer.innerHTML += `<div class="chat-message">
-            <span style="color: red; font-weight: bold;">${name}:</span></div>`
+            <span style="color: red; font-weight: bold;">${name}</span></div>`
             }
         })
     </script>
