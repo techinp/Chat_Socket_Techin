@@ -114,6 +114,10 @@
                     say(data.from, data.message)
                 });
 
+                socket.on('logout', (data) => {
+                    say('server', data.message)
+                });
+
                 // Show message
                 socket.on('msg', (data) => {
                     if (data.from != username) {
@@ -150,23 +154,25 @@
             $messageForm.addEventListener('submit', function (event) {
                 event.preventDefault()
 
-                if ($loginForm.value !== '') {
-                    alert('Please, enter your name')
-                    $messageInput.value = "";
-                } else {
-                    let message = $messageInput.value;
-                    $messageInput.value = "";
-                    // Send
-                    socket.emit('msg', message)
-                }
+                let message = $messageInput.value;
+                $messageInput.value = "";
+                // Send
+                socket.emit('msg', message)
+
 
             })
 
             function say(name, message) {
-                $messagesContainer.innerHTML +=
+                if (name !== undefined) {
+                    console.log('has name')
+                    $messagesContainer.innerHTML +=
                     `<div class="chat-message">
             <span style="color: red; font-weight: bold;">${name}:</span> ${message}
         </div>`
+                } else {
+                    console.log('no nameeeee')
+                }
+                
                 // Scroll down to last message
                 $messagesContainer.scrollTop = $messagesContainer.scrollHeight
             }

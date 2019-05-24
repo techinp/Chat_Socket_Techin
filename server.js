@@ -71,6 +71,10 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('socket.nickname :', socket.nickname);
 
+        io.in('A Room').emit('logout', {
+            message: socket.nickname + ' has disconnect'
+        });
+
         var index = users.name.indexOf(socket.nickname);
 
         console.log('index :', index);
@@ -84,6 +88,8 @@ io.on('connection', (socket) => {
         console.log('users :', users);
         // delete socket.nickname;
         updateUser(users.length, users.name);
+
+        
     });
 });
 
