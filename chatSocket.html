@@ -94,8 +94,16 @@
             let username;
 
             socket.on('userOnline', (data) => {
-                console.log('dataonline :', data.list);
+                console.log('dataonline :', data);
+
+                // show user online
                 $userCount.innerHTML = data.list
+                userOnlineContainer.innerHTML = ''
+                const children = data.name;
+                for (var i = 0; i < children.length; i++) {
+                    console.log(children[i]);
+                    userOnline(children[i])
+                }
             })
 
             function ioConnect() {
@@ -117,30 +125,6 @@
 
                 console.log('test online');
 
-
-
-                // Recieve Message
-                // socket.on('msg', (data) => {
-                //     console.log('data :', data);
-                //     if (data.from != username) {
-                //         say(data.from, data.message)
-                //     } else {
-                //         say('me', data.message)
-                //     }
-                // })
-
-                // // user disconnect
-                // socket.on('disconnect', (data) => {
-                //     console.log('disconnect :', data);
-                //     say('server', data.message)
-                // })
-
-                // // count of user
-                // socket.on('userCount', function (data) {
-                //     console.log(data.userCount);
-                //     $userCount.innerHTML = data.userCount
-                // });
-
                 return socket;
             }
 
@@ -150,7 +134,6 @@
                 socket = ioConnect()
                 username = name;
                 socket.emit('login', name)
-                // userOnline(name)
             }
 
             // Listener value from login form
