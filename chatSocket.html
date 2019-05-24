@@ -123,8 +123,6 @@
                     }
                 });
 
-                console.log('test online');
-
                 return socket;
             }
 
@@ -151,10 +149,17 @@
             // Send Message
             $messageForm.addEventListener('submit', function (event) {
                 event.preventDefault()
-                let message = $messageInput.value;
-                $messageInput.value = "";
-                // Send
-                socket.emit('msg', message)
+
+                if ($loginForm.value !== '') {
+                    alert('Please, enter your name')
+                    $messageInput.value = "";
+                } else {
+                    let message = $messageInput.value;
+                    $messageInput.value = "";
+                    // Send
+                    socket.emit('msg', message)
+                }
+
             })
 
             function say(name, message) {
@@ -168,7 +173,7 @@
 
             function userOnline(name) {
                 $userOnlineContainer.innerHTML += `<div class="chat-message">
-            <span style="color: red; font-weight: bold;">${name}</span></div>`
+            <span style="color: black; font-weight: bold;">${name}</span></div>`
             }
         })
     </script>
