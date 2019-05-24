@@ -24,10 +24,14 @@ app.get('/chatSocket', (req, res) => {
 // Create variable
 let users = {};
 let name = [];
+users.name = '';
 
 io.on('connection', (socket) => {
 
     let username = {};
+
+    // Avoid error indexOf 
+    
     // let name = [];
 
     // Every socket connection has a unique ID
@@ -56,7 +60,7 @@ io.on('connection', (socket) => {
         console.log('name :', users.name);
 
         updateUser(users.length, users.name);
-        
+
     });
 
     // Recieve message from clients
@@ -70,6 +74,26 @@ io.on('connection', (socket) => {
 
     // Disconnect
     socket.on('disconnect', () => {
+        console.log('socket.nickname :', socket.nickname);
+
+        var index = users.name.indexOf(socket.nickname);
+
+        console.log('index :', index);
+
+        if (index >= 0) {
+            users.name.splice(index, 1);
+        }
+
+        console.log('users.name :', users.name);
+
+        // if (users.name.length >= 0) {
+        //     if (index >= 0) {
+        //         users.name.splice(index, 1);
+        //     }
+        // }
+
+        console.log('users :', users);
+        // delete socket.nickname;
         updateUser(users.length, users.name);
     });
 });
