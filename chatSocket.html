@@ -135,7 +135,10 @@
                 // Create a socket connection
                 socket = ioConnect()
                 username = name;
-                socket.emit('login', name)
+                socket.emit('login', {
+                    name: name,
+                    room: window.location.pathname
+                })
             }
 
             // Listener value from login form
@@ -158,8 +161,6 @@
                 $messageInput.value = "";
                 // Send
                 socket.emit('msg', message)
-
-
             })
 
             function say(name, message) {
