@@ -92,6 +92,7 @@
 
             // username is used to be compared with 'from' in 'msg' events
             let username;
+            let user_id;
 
             socket.on('userOnline', (data) => {
                 console.log('dataonline :', data);
@@ -114,16 +115,19 @@
                     say(data.from, data.message)
                 });
 
+
                 socket.on('logout', (data) => {
                     say('server', data.message)
                 });
 
                 // Show message
                 socket.on('msg', (data) => {
-                    if (data.from != username) {
-                        say(data.from, data.message)
-                    } else {
+                    console.log('data.userid :', data.userid);
+                    console.log('user_id :', user_id);
+                    if (user_id === data.userid) {
                         say('me', data.message)
+                    } else {
+                        say(data.from, data.message)
                     }
                 });
 
@@ -135,15 +139,19 @@
                 // Create a socket connection
                 socket = ioConnect()
                 username = name;
+                user_id = socket.id
+                console.log('user_id :', user_id);
                 socket.emit('login', {
                     name: name,
-                    room: window.location.pathname
+                    room: window.location.pathname,
+                    userid: user_id
                 })
             }
 
             // Listener value from login form
             $loginForm.addEventListener('submit', function (event) {
                 event.preventDefault()
+
                 // Login with `name`
                 let name = $nameInput.value;
                 login(name)
@@ -167,13 +175,13 @@
                 if (name !== undefined) {
                     console.log('has name')
                     $messagesContainer.innerHTML +=
-                    `<div class="chat-message">
+                        `<div class="chat-message">
             <span style="color: red; font-weight: bold;">${name}:</span> ${message}
         </div>`
                 } else {
                     console.log('no nameeeee')
                 }
-                
+
                 // Scroll down to last message
                 $messagesContainer.scrollTop = $messagesContainer.scrollHeight
             }

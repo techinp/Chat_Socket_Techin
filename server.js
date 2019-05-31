@@ -34,7 +34,6 @@ for (let i = 0; i < rooms.length; i++) {
 // Socket.io
 
 // Create variable
-let users = {};
 let name = {};
 let nameA = [];
 let nameB = [];
@@ -60,8 +59,8 @@ io.on('connection', (socket) => {
 
     // let chat = db.collection('chat');
 
-    let username = {};
     let room;
+    let onlineList = [];
 
     // Every socket connection has a unique ID
     console.log('new connection: ' + socket.id);
@@ -69,35 +68,44 @@ io.on('connection', (socket) => {
     // Login
     socket.on('login', (data) => {
 
-        username.nickname = data.name;
-
+        // username.nickname = data.name;
         socket.nickname = data.name;
 
         console.log('name', name);
 
         if (data.room === '/A_Room') {
+
             console.log('Enter A Room');
             room = 'A Room';
             socket.join(room);
 
             // Keep all username in array
-            nameA.push(socket.nickname);
+            nameA.push({
+                name: socket.nickname,
+                id: data.userid
+            });
+
             name.nameA = nameA;
-            console.log('name.nameA :', name);
 
             io.in(room).emit('login', {
                 from: 'server',
                 message: data.name + ' logged in.'
             });
 
-            updateUser(room, name.nameA.length, name.nameA);
+            getUserOneline(name.nameA, name, onlineList);
+            updateUser(room, name.nameA.length, onlineList);
         } else if (data.room === '/B_Room') {
+
             console.log('Enter B Room');
             room = 'B Room';
             socket.join(room);
 
             // Keep all username in array
-            nameB.push(socket.nickname);
+            nameB.push({
+                name: socket.nickname,
+                id: data.userid
+            });
+
             name.nameB = nameB;
 
             io.in(room).emit('login', {
@@ -105,14 +113,20 @@ io.on('connection', (socket) => {
                 message: data.name + ' logged in.'
             });
 
-            updateUser(room, name.nameB.length, name.nameB);
+            getUserOneline(name.nameB, name, onlineList);
+            updateUser(room, name.nameB.length, onlineList);
         } else if (data.room === '/C_Room') {
+
             console.log('Enter C Room');
             room = 'C Room';
             socket.join(room);
 
             // Keep all username in array
-            nameC.push(socket.nickname);
+            nameC.push({
+                name: socket.nickname,
+                id: data.userid
+            });
+
             name.nameC = nameC;
 
             io.in(room).emit('login', {
@@ -120,9 +134,9 @@ io.on('connection', (socket) => {
                 message: data.name + ' logged in.'
             });
 
-            updateUser(room, name.nameC.length, name.nameC);
+            getUserOneline(name.nameC, name, onlineList);
+            updateUser(room, name.nameC.length, onlineList);
         }
-
     });
 
     // Recieve message from clients
@@ -131,11 +145,11 @@ io.on('connection', (socket) => {
 
         // chat.insert( {name: message})
         io.in(room).emit('msg', {
-            from: username.nickname,
-            message: message
+            from: socket.nickname,
+            message: message,
+            userid: socket.id
         });
 
-        console.log('room :', room);
     });
 
     // Disconnect
@@ -188,4 +202,13 @@ function updateUser(room, list, name) {
             name: name
         });
     });
+}
+
+function getUserOneline(array, object, result) {
+
+    for (let i = 0; i < array.length; i++) {
+        const element = array[i];
+        console.log('element :', element.name);
+        result.push(element.name);
+    }
 }
