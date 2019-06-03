@@ -102,8 +102,8 @@
                 userOnlineContainer.innerHTML = ''
                 const children = data.name;
                 for (var i = 0; i < children.length; i++) {
-                    console.log(children[i]);
-                    userOnline(children[i])
+                    console.log('nameList',children[i].name);
+                    userOnline(children[i].name)
                 }
             })
 

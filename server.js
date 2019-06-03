@@ -34,33 +34,19 @@ for (let i = 0; i < rooms.length; i++) {
 // Socket.io
 
 // Create variable
-let name = {};
-let nameA = [];
-let nameB = [];
-let nameC = [];
-
-// Avoid error indexOf 
-name.nameA = '';
-name.nameB = '';
-name.nameC = '';
-
+let name = {
+    roomA: [],
+    roomB: [],
+    roomC: []
+};
 
 const url = 'mongodb://localhost:3000/';
-
-// mongodb.connect(url, { useNewUrlParser: true }, (err, db) => {
-
-// if(err){
-//     throw err;
-// }
-
-// console.log("Connected successfully to server");
 
 io.on('connection', (socket) => {
 
     // let chat = db.collection('chat');
-
+    
     let room;
-    let onlineList = [];
 
     // Every socket connection has a unique ID
     console.log('new connection: ' + socket.id);
@@ -80,20 +66,17 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            nameA.push({
+            name.roomA.push({
                 name: socket.nickname,
                 id: data.userid
             });
-
-            name.nameA = nameA;
 
             io.in(room).emit('login', {
                 from: 'server',
                 message: data.name + ' logged in.'
             });
 
-            getUserOneline(name.nameA, name, onlineList);
-            updateUser(room, name.nameA.length, onlineList);
+            updateUserInRoom(room, name.roomA.length, name.roomA);
         } else if (data.room === '/B_Room') {
 
             console.log('Enter B Room');
@@ -101,20 +84,17 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            nameB.push({
+            name.roomB.push({
                 name: socket.nickname,
                 id: data.userid
             });
-
-            name.nameB = nameB;
 
             io.in(room).emit('login', {
                 from: 'server',
                 message: data.name + ' logged in.'
             });
 
-            getUserOneline(name.nameB, name, onlineList);
-            updateUser(room, name.nameB.length, onlineList);
+            updateUserInRoom(room, name.roomB.length, name.roomB);
         } else if (data.room === '/C_Room') {
 
             console.log('Enter C Room');
@@ -122,20 +102,18 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            nameC.push({
+            name.roomC.push({
                 name: socket.nickname,
                 id: data.userid
             });
 
-            name.nameC = nameC;
 
             io.in(room).emit('login', {
                 from: 'server',
                 message: data.name + ' logged in.'
             });
 
-            getUserOneline(name.nameC, name, onlineList);
-            updateUser(room, name.nameC.length, onlineList);
+            updateUserInRoom(room, name.roomC.length, name.roomC);
         }
     });
 
@@ -154,61 +132,51 @@ io.on('connection', (socket) => {
 
     // Disconnect
     socket.on('disconnect', () => {
-        console.log('socket.nickname :', socket.nickname);
 
         io.in(room).emit('logout', {
             message: socket.nickname + ' has disconnect'
         });
 
-        let indexA = name.nameA.indexOf(socket.nickname);
-        let indexB = name.nameB.indexOf(socket.nickname);
-        let indexC = name.nameC.indexOf(socket.nickname);
-
         if (room === 'A Room') {
-            if (indexA >= 0) {
-                name.nameA.splice(indexA, 1);
-            }
 
-            updateUser(room, name.nameA.length, name.nameA);
+            deleteUser(name.roomA, socket.id);
+            updateUserInRoom(room, name.roomA.length, name.roomA);
+
         } else if (room === 'B Room') {
-            if (indexB >= 0) {
-                name.nameB.splice(indexB, 1);
-            }
 
-            updateUser(room, name.nameB.length, name.nameB);
+            deleteUser(name.roomB, socket.id);
+            updateUserInRoom(room, name.roomB.length, name.roomB);
+
         } else if (room === 'C Room') {
-            if (indexA >= 0) {
-                name.nameC.splice(indexC, 1);
-            }
-
-            updateUser(room, name.nameC.length, name.nameC);
+            
+            deleteUser(name.roomC, socket.id);
+            updateUserInRoom(room, name.roomC.length, name.roomC);
         }
 
-        console.log('name.nameA :', name.nameA);
-        console.log('name.nameB :', name.nameB);
-        console.log('name.nameC :', name.nameC);
     });
 });
 // });
 
-function updateUser(room, list, name) {
+function deleteUser(array, socketID) {
+
+    for (let i = 0; i < array.length; i++) {
+        const value = array[i];
+        if (value.id === socketID) {
+            array.splice(i, 1);
+        }
+    }
+}
+
+function updateUserInRoom(room, list, name) {
     list = 0;
     io.in(room).clients((err, clients) => {
         if (err) throw err;
         console.log('clientsUpdate :', clients.length);
         list = clients.length;
+
         io.in(room).emit('userOnline', {
             list: clients.length,
             name: name
         });
     });
-}
-
-function getUserOneline(array, object, result) {
-
-    for (let i = 0; i < array.length; i++) {
-        const element = array[i];
-        console.log('element :', element.name);
-        result.push(element.name);
-    }
 }
