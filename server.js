@@ -1,6 +1,6 @@
 
 const mongodb = require('mongodb').MongoClient;
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 // const Schema = mongoose.Schema;
 
 const express = require('express');
@@ -8,6 +8,8 @@ const app = express();
 // Socket.IO
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+
+const dbName = 'chat';
 
 const port = process.env.PORT || 3000;
 app.set('port', port);
@@ -33,19 +35,27 @@ for (let i = 0; i < rooms.length; i++) {
 
 // Socket.io
 
-// Create variable
-let name = {
+// Create Object
+let User = {
     roomA: [],
     roomB: [],
     roomC: []
 };
 
-const url = 'mongodb://localhost:3000/';
+const dbUrl = 'mongodb://localhost:3000/chat';
+
+mongoose.connect(dbUrl, { useNewUrlParser: true }, (err) => {
+    console.log('mongodb connected', err);
+
+    var Message = mongoose.model('Message',{ 
+        name : String, 
+        message : String
+    });
+});
+
 
 io.on('connection', (socket) => {
 
-    // let chat = db.collection('chat');
-    
     let room;
 
     // Every socket connection has a unique ID
@@ -57,7 +67,7 @@ io.on('connection', (socket) => {
         // username.nickname = data.name;
         socket.nickname = data.name;
 
-        console.log('name', name);
+        console.log('user', User);
 
         if (data.room === '/A_Room') {
 
@@ -66,7 +76,7 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            name.roomA.push({
+            User.roomA.push({
                 name: socket.nickname,
                 id: data.userid
             });
@@ -76,7 +86,7 @@ io.on('connection', (socket) => {
                 message: data.name + ' logged in.'
             });
 
-            updateUserInRoom(room, name.roomA.length, name.roomA);
+            updateUserInRoom(room, User.roomA.length, User.roomA);
         } else if (data.room === '/B_Room') {
 
             console.log('Enter B Room');
@@ -84,7 +94,7 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            name.roomB.push({
+            User.roomB.push({
                 name: socket.nickname,
                 id: data.userid
             });
@@ -94,7 +104,7 @@ io.on('connection', (socket) => {
                 message: data.name + ' logged in.'
             });
 
-            updateUserInRoom(room, name.roomB.length, name.roomB);
+            updateUserInRoom(room, User.roomB.length, User.roomB);
         } else if (data.room === '/C_Room') {
 
             console.log('Enter C Room');
@@ -102,7 +112,7 @@ io.on('connection', (socket) => {
             socket.join(room);
 
             // Keep all username in array
-            name.roomC.push({
+            User.roomC.push({
                 name: socket.nickname,
                 id: data.userid
             });
@@ -113,7 +123,7 @@ io.on('connection', (socket) => {
                 message: data.name + ' logged in.'
             });
 
-            updateUserInRoom(room, name.roomC.length, name.roomC);
+            updateUserInRoom(room, User.roomC.length, User.roomC);
         }
     });
 
@@ -121,13 +131,11 @@ io.on('connection', (socket) => {
     socket.on('msg', (message) => {
         // Send message to clients
 
-        // chat.insert( {name: message})
         io.in(room).emit('msg', {
             from: socket.nickname,
             message: message,
             userid: socket.id
         });
-
     });
 
     // Disconnect
@@ -139,18 +147,18 @@ io.on('connection', (socket) => {
 
         if (room === 'A Room') {
 
-            deleteUser(name.roomA, socket.id);
-            updateUserInRoom(room, name.roomA.length, name.roomA);
+            deleteUser(User.roomA, socket.id);
+            updateUserInRoom(room, User.roomA.length, User.roomA);
 
         } else if (room === 'B Room') {
 
-            deleteUser(name.roomB, socket.id);
-            updateUserInRoom(room, name.roomB.length, name.roomB);
+            deleteUser(User.roomB, socket.id);
+            updateUserInRoom(room, User.roomB.length, User.roomB);
 
         } else if (room === 'C Room') {
             
-            deleteUser(name.roomC, socket.id);
-            updateUserInRoom(room, name.roomC.length, name.roomC);
+            deleteUser(User.roomC, socket.id);
+            updateUserInRoom(room, User.roomC.length, User.roomC);
         }
 
     });

@@ -122,8 +122,7 @@
 
                 // Show message
                 socket.on('msg', (data) => {
-                    console.log('data.userid :', data.userid);
-                    console.log('user_id :', user_id);
+
                     if (user_id === data.userid) {
                         say('me', data.message)
                     } else {
